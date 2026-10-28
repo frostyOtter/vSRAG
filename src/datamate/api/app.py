@@ -6,9 +6,10 @@ import logging
 import time
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import cast
+from pathlib import Path
+from typing import Annotated, cast
 
-from fastapi import FastAPI, HTTPException, Request, Response, status
+from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import RequestResponseEndpoint
 
@@ -40,7 +41,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     if configured_settings.llm_provider != "placeholder":
         raise ValueError("Only the placeholder LLM provider is available")
     service = AnswerService(
-        business_store=business_store,
         llm_client=PlaceholderLLMClient(),
         timeout_seconds=configured_settings.llm_timeout_seconds,
     )
@@ -114,10 +114,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             )
         return StatusResponse(status="ready")
 
-    @application.post("/v1/answer", response_model=AnswerResponse)
-    async def answer(request: AnswerRequest, http_request: Request) -> AnswerResponse:
+    def resolve_business(
+        request: AnswerRequest,
+        http_request: Request,
+    ) -> Path:
+        """Resolve the request's business folder before calling the route."""
+
         http_request.state.question_id = request.id
         http_request.state.business_id = request.business_id
+        store = cast(BusinessStore, application.state.business_store)
+        return store.resolve(request.business_id)
+
+    @application.post("/v1/answer", response_model=AnswerResponse)
+    async def answer(
+        request: AnswerRequest,
+        business_path: Annotated[Path, Depends(resolve_business)],
+    ) -> AnswerResponse:
         current_settings = cast(Settings, application.state.settings)
         if len(request.question) > current_settings.max_question_length:
             raise HTTPException(
@@ -125,7 +137,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 detail="Question is too long",
             )
         answer_service = cast(AnswerService, application.state.answer_service)
-        return await answer_service.answer(request)
+        return await answer_service.answer(request, business_path)
 
     return application
 
