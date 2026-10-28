@@ -1,2 +1,11 @@
+"""DataMate package."""
+
+from __future__ import annotations
+
+
 def main() -> None:
-    print("Hello from datamate!")
+    """Run the development API server."""
+
+    import uvicorn
+
+    uvicorn.run("datamate.api.app:app", host="0.0.0.0", port=8000)
