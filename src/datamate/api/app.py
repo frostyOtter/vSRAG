@@ -13,9 +13,9 @@ from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import RequestResponseEndpoint
 
+from datamate.agent.placeholder import PlaceholderLLMClient
 from datamate.business_store import BusinessNotFoundError, BusinessStore
 from datamate.config import Settings
-from datamate.llm.placeholder import PlaceholderLLMClient
 from datamate.models import (
     AnswerRequest,
     AnswerResponse,

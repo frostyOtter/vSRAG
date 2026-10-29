@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datamate.llm.base import LLMRequest
-from datamate.models import AnswerResult
+from datamate.agent.base import LLMRequest
+from datamate.answer_contract import AnswerResult, StringAnswer
 
 
 class PlaceholderLLMClient:
@@ -18,7 +18,7 @@ class PlaceholderLLMClient:
     async def answer(self, request: LLMRequest) -> AnswerResult:
         """Return a deterministic placeholder result."""
 
-        return AnswerResult(
+        return StringAnswer(
             type="string",
             answer=f"Placeholder answer for {request.business_id}",
         )

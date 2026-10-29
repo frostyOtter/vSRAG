@@ -1,1 +1,1 @@
-"""LLM client implementations."""
+"""Chat model contracts and provider adapters."""

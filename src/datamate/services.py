@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 
-from datamate.llm.base import LLMClient, LLMRequest
+from datamate.agent.base import LLMClient, LLMRequest
 from datamate.models import AnswerRequest, AnswerResponse
 
 

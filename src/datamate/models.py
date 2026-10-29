@@ -3,23 +3,13 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Annotated, Literal
+from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from datamate.answer_contract import AnswerResult
+
 BusinessId = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+$")]
-AnswerType = Literal[
-    "number",
-    "percent",
-    "date",
-    "boolean",
-    "string",
-    "list",
-    "table",
-    "unanswerable",
-    "abstain",
-]
-AnswerValue = str | int | float | bool | list[object] | dict[str, object] | None
 
 
 class StrictModel(BaseModel):
@@ -35,14 +25,6 @@ class AnswerRequest(StrictModel):
     business_id: BusinessId
     question: Annotated[str, Field(min_length=1)]
     as_of_date: date
-
-
-class AnswerResult(StrictModel):
-    """DataMate-shaped answer returned by an LLM client."""
-
-    type: AnswerType
-    answer: AnswerValue = None
-    reason: str | None = None
 
 
 class AnswerResponse(StrictModel):
